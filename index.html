@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IdeaFlow — Version 5</title>
+  <meta name="description" content="IdeaFlow Version 5 mit PDF-Export, 3D-Modus, Tabs, Drag & Drop, mehrsprachigem Assistenten und automatischer Materialberechnung." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <h1>IdeaFlow</h1>
+          <p>Version 5</p>
+        </div>
+      </div>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="projectTab">Projekt</button>
+        <button class="tab-btn" data-tab="planTab">Plan</button>
+        <button class="tab-btn" data-tab="assistantTab">Assistent</button>
+        <button class="tab-btn" data-tab="exportTab">Export</button>
+      </nav>
+
+      <div class="sidebar-actions">
+        <button id="createBtn" class="primary-btn" type="button">Erstellen</button>
+        <button id="saveBtn" class="secondary-btn" type="button">Speichern</button>
+        <button id="speakBtn" class="secondary-btn" type="button">Vorlesen</button>
+        <button id="voiceBtn" class="secondary-btn" type="button">Spracheingabe</button>
+        <button id="jsonBtn" class="secondary-btn" type="button">JSON</button>
+        <button id="pdfBtn" class="secondary-btn" type="button">PDF</button>
+        <button id="printBtn" class="secondary-btn" type="button">Drucken</button>
+        <button id="clearBtn" class="secondary-btn" type="button">Reset</button>
+      </div>
+
+      <div class="sidebar-note">
+        <strong>Hinweis</strong>
+        <p>PDF-Export läuft über den Browser-Druckdialog. Dort kannst du „Als PDF speichern“ wählen.</p>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <h2>Planung, Berechnung und Export</h2>
+          <p>Mit 2D/3D-Ansicht, Materiallogik, Drag & Drop und Assistent.</p>
+        </div>
+        <div class="topbar-badges">
+          <span id="langBadge" class="badge">DE</span>
+          <span id="modeBadge" class="badge">2D</span>
+        </div>
+      </header>
+
+      <section id="projectTab" class="tab-panel active">
+        <div class="grid-2">
+          <section class="panel">
+            <h3>Projekt</h3>
+
+            <div class="field">
+              <label for="projectNameInput">Projektname</label>
+              <input id="projectNameInput" type="text" placeholder="z. B. Garten mit Teich" />
+            </div>
+
+            <div class="field">
+              <label for="ideaInput">Beschreibung</label>
+              <textarea id="ideaInput" placeholder="Beschreibe dein Projekt..."></textarea>
+            </div>
+
+            <div class="field">
+              <label for="categoryInput">Kategorie</label>
+              <select id="categoryInput">
+                <option value="auto">Automatisch erkennen</option>
+                <option value="Gartenprojekt">Gartenprojekt</option>
+                <option value="Wohn- oder Raumprojekt">Wohn- oder Raumprojekt</option>
+                <option value="Technikprojekt">Technikprojekt</option>
+                <option value="Schul- oder Lernprojekt">Schul- oder Lernprojekt</option>
+                <option value="Bastel- oder DIY-Projekt">Bastel- oder DIY-Projekt</option>
+                <option value="Organisationsprojekt">Organisationsprojekt</option>
+                <option value="Freizeit- oder Eventprojekt">Freizeit- oder Eventprojekt</option>
+                <option value="Kindergartenprojekt">Kindergartenprojekt</option>
+                <option value="Schulgebäudeprojekt">Schulgebäudeprojekt</option>
+                <option value="Schwimmbadprojekt">Schwimmbadprojekt</option>
+                <option value="Firmenprojekt">Firmenprojekt</option>
+                <option value="Game-Design-Projekt">Game-Design-Projekt</option>
+                <option value="Innenarchitekturprojekt">Innenarchitekturprojekt</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="budgetInput">Budget</label>
+              <input id="budgetInput" type="number" min="0" step="1" placeholder="z. B. 1500" />
+            </div>
+
+            <div class="field">
+              <label for="languageInput">Assistentensprache</label>
+              <select id="languageInput">
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="widthInput">Breite (m)</label>
+              <input id="widthInput" type="number" min="0" step="0.01" placeholder="z. B. 4.5" />
+            </div>
+
+            <div class="field">
+              <label for="heightInput">Höhe (m)</label>
+              <input id="heightInput" type="number" min="0" step="0.01" placeholder="z. B. 3.2" />
+            </div>
+
+            <div class="field">
+              <label for="depthInput">Tiefe (m)</label>
+              <input id="depthInput" type="number" min="0" step="0.01" placeholder="z. B. 2.0" />
+            </div>
+
+            <div class="field">
+              <label for="materialTypeInput">Materialtyp</label>
+              <select id="materialTypeInput">
+                <option value="farbe">Farbe</option>
+                <option value="boden">Boden</option>
+                <option value="teppich">Teppich</option>
+                <option value="pflaster">Pflaster</option>
+                <option value="erde">Erde</option>
+                <option value="beton">Beton</option>
+                <option value="holz">Holz</option>
+                <option value="fliesen">Fliesen</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="spacingInput">Abstand pro Objekt (m)</label>
+              <input id="spacingInput" type="number" min="0" step="0.01" placeholder="z. B. 0.5" />
+            </div>
+
+            <div class="field">
+              <label for="objectCountInput">Objektanzahl</label>
+              <input id="objectCountInput" type="number" min="0" step="1" placeholder="z. B. 6" />
+            </div>
+
+            <div class="field">
+              <label for="requiredAreaInput">Benötigte Fläche (m²)</label>
+              <input id="requiredAreaInput" type="number" min="0" step="0.01" placeholder="z. B. 12" />
+            </div>
+          </section>
+
+          <section class="panel">
+            <h3>Bilder</h3>
+            <label class="upload-box" for="imageInput">
+              <span>Bilder hochladen</span>
+              <small>Mehrere Bilder auswählen</small>
+            </label>
+            <input id="imageInput" type="file" accept="image/*" multiple />
+            <div id="imageGallery" class="image-gallery"></div>
+
+            <h3>Items</h3>
+            <div class="item-actions">
+              <button id="addItemBtn" type="button" class="secondary-btn">Item hinzufügen</button>
+              <button id="addFurnitureBtn" type="button" class="secondary-btn">Möbel</button>
+              <button id="addGardenBtn" type="button" class="secondary-btn">Garten</button>
+              <button id="addTechBtn" type="button" class="secondary-btn">Technik</button>
+            </div>
+            <div id="itemsContainer" class="items-container"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="planTab" class="tab-panel">
+        <div class="grid-2">
+          <section class="panel">
+            <h3>2D-Fläche</h3>
+            <canvas id="planCanvas" width="900" height="600"></canvas>
+          </section>
+
+          <section class="panel">
+            <h3>3D-Modus</h3>
+            <div class="toggle-row">
+              <button id="toggle3dBtn" class="secondary-btn" type="button">3D umschalten</button>
+            </div>
+            <div id="threeDBox" class="three-d-box">
+              <div class="cube">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face right"></div>
+                <div class="face left"></div>
+                <div class="face top"></div>
+                <div class="face bottom"></div>
+              </div>
+            </div>
+            <div class="muted">Der 3D-Modus ist eine visuelle Vorschau auf Basis deiner Maße.</div>
+          </section>
+        </div>
+      </section>
+
+      <section id="assistantTab" class="tab-panel">
+        <div class="grid-2">
+          <section class="panel">
+            <h3>KI-Assistent</h3>
+            <div id="assistantBox" class="assistant-box">Hier erscheint die intelligente Zusammenfassung.</div>
+          </section>
+
+          <section class="panel">
+            <h3>Dashboard</h3>
+            <div id="dashboard" class="dashboard-grid"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="exportTab" class="tab-panel">
+        <div class="grid-2">
+          <section class="panel">
+            <h3>Ergebnis</h3>
+            <div id="output" class="output-box">Hier erscheint die Analyse.</div>
+          </section>
+
+          <section class="panel">
+            <h3>Gespeicherte Projekte</h3>
+            <div id="savedProjectsList" class="saved-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
