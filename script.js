@@ -1,4 +1,3 @@
-// script.js
 const $ = (id) => document.getElementById(id);
 
 const form = $("plannerForm");
@@ -7,7 +6,6 @@ const fields = {
   projectName: $("projectName"),
   objectType: $("objectType"),
   location: $("location"),
-  projectDate: $("projectDate"),
   status: $("status"),
   roomCount: $("roomCount"),
   length: $("length"),
@@ -35,7 +33,6 @@ const fields = {
   weight: $("weight"),
   loadCapacity: $("loadCapacity"),
   floorPlan: $("floorPlan"),
-  floorPlanFile: $("floorPlanFile"),
   notes: $("notes")
 };
 
@@ -62,7 +59,6 @@ const outputs = {
   weight: $("weightOut"),
   loadCapacity: $("loadCapacityOut"),
   location: $("locationOut"),
-  date: $("dateOut"),
   materialFill: $("materialFill"),
   fileBadge: $("fileBadge")
 };
@@ -81,13 +77,6 @@ function val(el) {
 
 function textOrDash(v) {
   return v && String(v).trim() ? String(v) : "–";
-}
-
-function formatDateGerman(dateString) {
-  if (!dateString) return "–";
-  const d = new Date(dateString);
-  if (isNaN(d.getTime())) return dateString;
-  return new Intl.DateTimeFormat("de-DE").format(d);
 }
 
 function calculate() {
@@ -157,14 +146,12 @@ function calculate() {
   outputs.weight.textContent = `${formatNumber(val(fields.weight))} kg`;
   outputs.loadCapacity.textContent = `${formatNumber(val(fields.loadCapacity))} kg/m²`;
   outputs.location.textContent = textOrDash(fields.location.value);
-  outputs.date.textContent = formatDateGerman(fields.projectDate.value);
   outputs.materialFill.style.width = `${materialPercent}%`;
 
   return {
     projectName: fields.projectName.value,
     objectType: fields.objectType.value,
     location: fields.location.value,
-    projectDate: fields.projectDate.value,
     status: fields.status.value,
     roomCount: val(fields.roomCount),
     length,
@@ -243,7 +230,6 @@ form.addEventListener("submit", (e) => {
 
 $("resetBtn").addEventListener("click", () => {
   form.reset();
-  outputs.fileBadge.textContent = "Keine Grundriss-Datei ausgewählt";
   outputs.materialFill.style.width = "0%";
   localStorage.removeItem("objektplaner-data");
   calculate();
@@ -254,8 +240,7 @@ $("saveBtn").addEventListener("click", saveToLocal);
 $("demoFillBtn").addEventListener("click", () => {
   fields.projectName.value = "Gartenbereich Nord";
   fields.objectType.value = "Garten";
-  fields.location.value = "Hinterer Garten";
-  fields.projectDate.value = "2026-06-04";
+  fields.location.value = "draußen";
   fields.status.value = "geplant";
   fields.roomCount.value = "3";
   fields.length.value = "6";
@@ -286,13 +271,6 @@ $("demoFillBtn").addEventListener("click", () => {
   fields.notes.value = "Dach leicht geneigt, 2 Fenster an der Längsseite, isolierte Wände, zusätzliche Schrauben und Winkel einplanen.";
   calculate();
   window.scrollTo({ top: $("planer").offsetTop - 90, behavior: "smooth" });
-});
-
-fields.floorPlanFile.addEventListener("change", () => {
-  const file = fields.floorPlanFile.files[0];
-  outputs.fileBadge.textContent = file
-    ? `Datei: ${file.name}`
-    : "Keine Grundriss-Datei ausgewählt";
 });
 
 const observer = new IntersectionObserver((entries) => {
