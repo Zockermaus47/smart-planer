@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -124,14 +123,11 @@
 
             <label>
               Standort
-              <input type="text" id="location" placeholder="z. B. Berlin, Garten hinten" />
-              <span class="hint">Ort oder Projektposition.</span>
-            </label>
-
-            <label>
-              Datum
-              <input type="date" id="projectDate" />
-              <span class="hint">Planungs- oder Startdatum.</span>
+              <select id="location">
+                <option value="draußen">draußen</option>
+                <option value="innen">innen</option>
+              </select>
+              <span class="hint">Wähle, ob das Projekt draußen oder innen ist.</span>
             </label>
 
             <label>
@@ -329,12 +325,6 @@
             </label>
 
             <label class="field-wide">
-              Grundriss-Datei / Skizze hochladen
-              <input type="file" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf,.svg" />
-              <span class="hint">Optional: Name der Datei wird angezeigt, aber nicht online gespeichert.</span>
-            </label>
-
-            <label class="field-wide">
               Notizen
               <textarea id="notes" placeholder="Weitere Hinweise, Maße, Besonderheiten, Materialwünsche ..."></textarea>
               <span class="hint">Hier kannst du alles ergänzen, was später wichtig ist.</span>
@@ -384,7 +374,6 @@
           <div class="result-line"><span>Gewicht</span><strong id="weightOut">0,00 kg</strong></div>
           <div class="result-line"><span>Belastbarkeit</span><strong id="loadCapacityOut">0,00 kg/m²</strong></div>
           <div class="result-line"><span>Standort</span><strong id="locationOut">–</strong></div>
-          <div class="result-line"><span>Datum</span><strong id="dateOut">–</strong></div>
         </div>
 
         <div>
@@ -394,7 +383,7 @@
           </div>
         </div>
 
-        <div class="file-badge" id="fileBadge">Keine Grundriss-Datei ausgewählt</div>
+        <div class="file-badge" id="fileBadge">Datei-Upload entfernt</div>
       </aside>
     </section>
 
@@ -406,7 +395,7 @@
           <li>Anzahl der Räume oder Zonen</li>
           <li>Fenster- und Türflächen</li>
           <li>Isolierung / Dämmung</li>
-          <li>Standort und Datum</li>
+          <li>Standort: draußen oder innen</li>
           <li>Status: geplant, in Arbeit, fertig</li>
           <li>Materialpreis pro Einheit</li>
           <li>Gewicht oder Belastbarkeit</li>
@@ -418,8 +407,8 @@
         <h3>Wichtig</h3>
         <ul>
           <li>Diese Datei ersetzt deine bisherige <strong>index.html</strong>.</li>
-          <li>Darunter kommt die komplette <strong>script.js</strong>.</li>
-          <li>Deine bisherige <strong>style.css</strong> kannst du erstmal behalten.</li>
+          <li>Die <strong>script.js</strong> dazu hast du schon.</li>
+          <li>Danach die Seite neu laden.</li>
         </ul>
       </div>
     </section>
