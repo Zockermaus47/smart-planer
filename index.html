@@ -3,231 +3,1068 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IdeaFlow — Version 5</title>
-  <meta name="description" content="IdeaFlow Version 5 mit PDF-Export, 3D-Modus, Tabs, Drag & Drop, mehrsprachigem Assistenten und automatischer Materialberechnung." />
+  <title>ObjektPlaner – Flächen, Volumen, Material & Kosten</title>
+  <meta name="description" content="Planer für Grundfläche, Volumen, Grundriss, Material und Kostenkalkulation." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f4f1ea;
+      --paper:#fbf8f2;
+      --ink:#171513;
+      --muted:#665f56;
+      --line:rgba(23,21,19,.12);
+      --accent:#9d4b2e;
+      --accent-2:#c98b3f;
+      --green:#2f6b4f;
+      --shadow:0 18px 40px rgba(28,20,14,.08);
+      --radius:26px;
+      --radius-sm:18px;
+      --max:1280px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Manrope", sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(201,139,63,.14), transparent 24%),
+        radial-gradient(circle at 85% 12%, rgba(157,75,46,.10), transparent 20%),
+        linear-gradient(180deg, #f7f4ee 0%, #f2eee7 100%);
+      min-height:100vh;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.35;
+      background-image:
+        linear-gradient(rgba(23,21,19,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,21,19,.03) 1px, transparent 1px);
+      background-size:26px 26px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.7), transparent 95%);
+    }
+
+    .wrap{width:min(calc(100% - 28px), var(--max)); margin-inline:auto}
+
+    .reveal{
+      opacity:0;
+      transform:translateY(20px);
+      animation:rise .8s ease forwards;
+    }
+    .reveal:nth-child(2){animation-delay:.08s}
+    .reveal:nth-child(3){animation-delay:.16s}
+    .reveal:nth-child(4){animation-delay:.24s}
+    .reveal:nth-child(5){animation-delay:.32s}
+
+    @keyframes rise{
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    header{
+      padding:22px 0 8px;
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(16px);
+      background:linear-gradient(180deg, rgba(247,244,238,.88), rgba(247,244,238,.58));
+      border-bottom:1px solid rgba(23,21,19,.06);
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-decoration:none;
+      color:var(--ink);
+    }
+
+    .brand-mark{
+      width:42px;height:42px;border-radius:14px;
+      background:
+        linear-gradient(135deg, var(--accent), #70331e),
+        linear-gradient(135deg, rgba(255,255,255,.3), transparent);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.25), var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .brand-mark::before,
+    .brand-mark::after{
+      content:"";
+      position:absolute;
+      background:rgba(255,255,255,.8);
+      border-radius:2px;
+    }
+    .brand-mark::before{width:18px;height:2px;left:12px;top:14px}
+    .brand-mark::after{width:2px;height:18px;left:20px;top:12px}
+    .brand-text strong{
+      display:block;
+      font-family:"Space Grotesk", sans-serif;
+      font-size:1rem;
+      letter-spacing:-.03em;
+    }
+    .brand-text span{
+      font-size:.82rem;
+      color:var(--muted);
+    }
+
+    .nav-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      color:var(--ink);
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:.92rem;
+      cursor:pointer;
+      transition:.25s ease;
+      text-decoration:none;
+    }
+    .pill:hover{
+      transform:translateY(-2px);
+      background:#fff;
+      box-shadow:0 10px 22px rgba(23,21,19,.08);
+    }
+
+    main{padding:36px 0 60px}
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:22px;
+      align-items:stretch;
+    }
+
+    .hero-copy,
+    .hero-panel,
+    .section,
+    .results,
+    .notes{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(251,248,242,.82);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(14px);
+    }
+
+    .hero-copy{
+      padding:clamp(24px, 4vw, 46px);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height:420px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      width:max-content;
+      font-size:.85rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--green);
+      background:rgba(47,107,79,.08);
+      border:1px solid rgba(47,107,79,.18);
+      border-radius:999px;
+      padding:8px 12px;
+    }
+
+    h1,h2,h3{
+      font-family:"Space Grotesk", sans-serif;
+      line-height:.98;
+      letter-spacing:-.05em;
+      margin:0;
+    }
+
+    h1{
+      font-size:clamp(2.4rem, 6vw, 6rem);
+      max-width:9ch;
+      margin:18px 0 18px;
+    }
+
+    .lead{
+      max-width:54ch;
+      font-size:clamp(1rem, 1.4vw, 1.08rem);
+      line-height:1.7;
+      color:var(--muted);
+      margin:0 0 28px;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:auto;
+    }
+
+    .hero-grid div{
+      padding:14px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+    }
+    .hero-grid strong{
+      display:block;
+      font-size:1.1rem;
+      margin-bottom:4px;
+      font-family:"Space Grotesk", sans-serif;
+    }
+    .hero-grid span{
+      color:var(--muted);
+      font-size:.88rem;
+    }
+
+    .hero-panel{
+      padding:22px;
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+      gap:16px;
+      min-height:420px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .panel-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    .panel-tag{
+      font-size:.8rem;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.09em;
+    }
+
+    .blueprint{
+      border-radius:22px;
+      border:1px solid var(--line);
+      background:
+        linear-gradient(rgba(23,21,19,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,21,19,.05) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,255,255,.72), rgba(246,241,231,.95));
+      background-size:22px 22px, 22px 22px, auto;
+      min-height:260px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .room{
+      position:absolute;
+      border:2px solid rgba(23,21,19,.75);
+      background:rgba(201,139,63,.12);
+    }
+    .r1{left:9%;top:14%;width:38%;height:28%}
+    .r2{right:11%;top:14%;width:30%;height:22%}
+    .r3{left:9%;bottom:16%;width:28%;height:24%}
+    .r4{left:41%;bottom:16%;width:40%;height:34%}
+    .door{
+      position:absolute;
+      width:28px;height:28px;
+      border:2px solid rgba(23,21,19,.65);
+      border-left:none;border-bottom:none;
+      border-radius:0 100% 0 0;
+      background:transparent;
+    }
+    .d1{left:36%;top:34%}
+    .d2{left:35%;bottom:33%}
+    .d3{right:29%;top:31%}
+
+    .measure{
+      position:absolute;
+      font-size:.75rem;
+      color:var(--muted);
+      font-weight:700;
+      background:rgba(255,255,255,.84);
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+    }
+    .m1{left:10%;top:6%}
+    .m2{right:10%;bottom:7%}
+    .m3{left:44%;top:52%}
+
+    .mini-stats{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+    .mini-stats .stat{
+      padding:14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.55);
+      border:1px solid var(--line);
+    }
+    .mini-stats .label{
+      font-size:.82rem;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .mini-stats .value{
+      font-family:"Space Grotesk", sans-serif;
+      font-size:1.25rem;
+      font-weight:700;
+    }
+
+    .content{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:22px;
+    }
+
+    .section{padding:24px}
+    .section h2,
+    .results h2,
+    .notes h2{
+      font-size:clamp(1.6rem, 3vw, 2.4rem);
+      margin-bottom:10px;
+    }
+
+    .section-intro{
+      color:var(--muted);
+      line-height:1.65;
+      margin:0 0 24px;
+      max-width:60ch;
+    }
+
+    form{
+      display:grid;
+      gap:18px;
+    }
+
+    .field-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:16px;
+    }
+
+    .field-wide{grid-column:1/-1}
+
+    label{
+      display:grid;
+      gap:8px;
+      font-weight:700;
+      font-size:.95rem;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-weight:600;
+      font-size:.82rem;
+      margin-top:-2px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid rgba(23,21,19,.12);
+      background:rgba(255,255,255,.72);
+      border-radius:16px;
+      padding:14px 15px;
+      font:inherit;
+      color:var(--ink);
+      outline:none;
+      transition:.22s ease;
+    }
+
+    textarea{min-height:120px; resize:vertical}
+
+    input:focus, select:focus, textarea:focus{
+      border-color:rgba(157,75,46,.45);
+      box-shadow:0 0 0 4px rgba(157,75,46,.11);
+      background:#fff;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      padding-top:4px;
+    }
+
+    button{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      font:inherit;
+    }
+
+    .btn-primary,
+    .btn-secondary{
+      border-radius:999px;
+      padding:14px 20px;
+      font-weight:800;
+      transition:.25s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent), #7a3922);
+      color:#fff;
+      box-shadow:0 14px 26px rgba(157,75,46,.22);
+    }
+    .btn-primary:hover{
+      transform:translateY(-2px) scale(1.01);
+      box-shadow:0 18px 30px rgba(157,75,46,.28);
+    }
+    .btn-primary:active{transform:translateY(0) scale(.99)}
+
+    .btn-secondary{
+      background:rgba(255,255,255,.7);
+      border:1px solid var(--line);
+      color:var(--ink);
+    }
+    .btn-secondary:hover{
+      transform:translateY(-2px);
+      background:#fff;
+    }
+
+    .results{
+      padding:24px;
+      display:grid;
+      gap:18px;
+      align-content:start;
+    }
+
+    .result-stack{
+      display:grid;
+      gap:14px;
+    }
+
+    .result-line{
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      align-items:flex-end;
+      padding:14px 0;
+      border-bottom:1px dashed rgba(23,21,19,.12);
+    }
+    .result-line:last-child{border-bottom:none}
+    .result-line span{
+      color:var(--muted);
+      font-weight:700;
+    }
+    .result-line strong{
+      font-family:"Space Grotesk", sans-serif;
+      font-size:1.25rem;
+      letter-spacing:-.03em;
+      text-align:right;
+    }
+
+    .results-highlight{
+      border-radius:22px;
+      padding:18px;
+      background:linear-gradient(135deg, rgba(157,75,46,.09), rgba(201,139,63,.12));
+      border:1px solid rgba(157,75,46,.14);
+    }
+    .results-highlight .tiny{
+      color:var(--muted);
+      font-size:.82rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+    .results-highlight .big{
+      font-family:"Space Grotesk", sans-serif;
+      font-size:clamp(1.8rem, 4vw, 3rem);
+      line-height:1;
+    }
+
+    .material-bar{
+      height:14px;
+      border-radius:999px;
+      background:rgba(23,21,19,.08);
+      overflow:hidden;
+      border:1px solid rgba(23,21,19,.08);
+    }
+    .material-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, var(--green), #5f9a7d);
+      transition:width .6s ease;
+    }
+
+    .notes{
+      margin-top:22px;
+      padding:24px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    .note-block{
+      padding:18px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.52);
+    }
+
+    .note-block h3{
+      font-size:1.2rem;
+      margin-bottom:10px;
+    }
+
+    .note-block ul{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .file-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      background:rgba(47,107,79,.08);
+      color:var(--green);
+      border:1px solid rgba(47,107,79,.18);
+      padding:10px 12px;
+      font-size:.9rem;
+      font-weight:800;
+      min-height:44px;
+    }
+
+    footer{
+      padding:30px 0 50px;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .obs{
+      opacity:0;
+      transform:translateY(24px);
+      transition:opacity .7s ease, transform .7s ease;
+    }
+    .obs.in{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    @media (max-width: 1024px){
+      .hero,.content,.notes{grid-template-columns:1fr}
+      .hero-copy,.hero-panel{min-height:auto}
+    }
+
+    @media (max-width: 720px){
+      .hero-grid,.field-grid,.mini-stats{grid-template-columns:1fr}
+      .nav{align-items:flex-start; flex-direction:column}
+      h1{max-width:12ch}
+      .section,.results,.notes,.hero-copy,.hero-panel{border-radius:22px}
+      .actions{flex-direction:column}
+      .btn-primary,.btn-secondary{width:100%}
+    }
+  </style>
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark"></div>
+  <header>
+    <div class="wrap nav">
+      <a href="#" class="brand" aria-label="ObjektPlaner Startseite">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-text">
+          <strong>ObjektPlaner</strong>
+          <span>Fläche · Volumen · Material · Kosten</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a class="pill" href="#planer">Zum Planer</a>
+        <button class="pill" id="demoFillBtn" type="button">Demo ausfüllen</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <article class="hero-copy reveal">
         <div>
-          <h1>IdeaFlow</h1>
-          <p>Version 5</p>
+          <div class="eyebrow">Neustart für deinen Objektplaner</div>
+          <h1>Planen statt schätzen.</h1>
+          <p class="lead">
+            Erfasse Grundfläche in m², Objektgröße in m³, Grundriss, Material, Materialkosten und zusätzliche Projektwerte
+            in einer klaren Oberfläche. Ideal für einfache Bau-, Raum- oder Objektkalkulationen.
+          </p>
         </div>
-      </div>
 
-      <nav class="tabs">
-        <button class="tab-btn active" data-tab="projectTab">Projekt</button>
-        <button class="tab-btn" data-tab="planTab">Plan</button>
-        <button class="tab-btn" data-tab="assistantTab">Assistent</button>
-        <button class="tab-btn" data-tab="exportTab">Export</button>
-      </nav>
-
-      <div class="sidebar-actions">
-        <button id="createBtn" class="primary-btn" type="button">Erstellen</button>
-        <button id="saveBtn" class="secondary-btn" type="button">Speichern</button>
-        <button id="speakBtn" class="secondary-btn" type="button">Vorlesen</button>
-        <button id="voiceBtn" class="secondary-btn" type="button">Spracheingabe</button>
-        <button id="jsonBtn" class="secondary-btn" type="button">JSON</button>
-        <button id="pdfBtn" class="secondary-btn" type="button">PDF</button>
-        <button id="printBtn" class="secondary-btn" type="button">Drucken</button>
-        <button id="clearBtn" class="secondary-btn" type="button">Reset</button>
-      </div>
-
-      <div class="sidebar-note">
-        <strong>Hinweis</strong>
-        <p>PDF-Export läuft über den Browser-Druckdialog. Dort kannst du „Als PDF speichern“ wählen.</p>
-      </div>
-    </aside>
-
-    <main class="content">
-      <header class="topbar">
-        <div>
-          <h2>Planung, Berechnung und Export</h2>
-          <p>Mit 2D/3D-Ansicht, Materiallogik, Drag & Drop und Assistent.</p>
+        <div class="hero-grid">
+          <div>
+            <strong>m²</strong>
+            <span>Grundfläche automatisch berechnen</span>
+          </div>
+          <div>
+            <strong>m³</strong>
+            <span>Volumen direkt aus Maßen ableiten</span>
+          </div>
+          <div>
+            <strong>€</strong>
+            <span>Material, Arbeit & Gesamtkosten</span>
+          </div>
         </div>
-        <div class="topbar-badges">
-          <span id="langBadge" class="badge">DE</span>
-          <span id="modeBadge" class="badge">2D</span>
+      </article>
+
+      <aside class="hero-panel reveal">
+        <div class="panel-top">
+          <div>
+            <div class="panel-tag">Grundriss-Vorschau</div>
+            <h3>Objekt-Schema</h3>
+          </div>
+          <span class="pill" style="padding:8px 12px;">Live</span>
         </div>
-      </header>
 
-      <section id="projectTab" class="tab-panel active">
-        <div class="grid-2">
-          <section class="panel">
-            <h3>Projekt</h3>
+        <div class="blueprint" aria-hidden="true">
+          <div class="room r1"></div>
+          <div class="room r2"></div>
+          <div class="room r3"></div>
+          <div class="room r4"></div>
+          <div class="door d1"></div>
+          <div class="door d2"></div>
+          <div class="door d3"></div>
+          <div class="measure m1">Länge × Breite</div>
+          <div class="measure m2">Materialflächen</div>
+          <div class="measure m3">Volumen</div>
+        </div>
 
-            <div class="field">
-              <label for="projectNameInput">Projektname</label>
-              <input id="projectNameInput" type="text" placeholder="z. B. Garten mit Teich" />
-            </div>
+        <div class="mini-stats">
+          <div class="stat">
+            <div class="label">Empfohlene Zusatzfelder</div>
+            <div class="value">Arbeitskosten</div>
+          </div>
+          <div class="stat">
+            <div class="label">Sinnvoll für später</div>
+            <div class="value">Kosten / m²</div>
+          </div>
+        </div>
+      </aside>
+    </section>
 
-            <div class="field">
-              <label for="ideaInput">Beschreibung</label>
-              <textarea id="ideaInput" placeholder="Beschreibe dein Projekt..."></textarea>
-            </div>
+    <section class="content">
+      <section class="section obs" id="planer">
+        <h2>Projekt eingeben</h2>
+        <p class="section-intro">
+          Ich habe deine gewünschten Punkte eingebaut und erweitert: Grundfläche, Objektgröße, Grundriss, Material, Materialkosten
+          sowie zusätzliche Eingaben wie Arbeitskosten, Transport, Reserve und automatische Kennzahlen.
+        </p>
 
-            <div class="field">
-              <label for="categoryInput">Kategorie</label>
-              <select id="categoryInput">
-                <option value="auto">Automatisch erkennen</option>
-                <option value="Gartenprojekt">Gartenprojekt</option>
-                <option value="Wohn- oder Raumprojekt">Wohn- oder Raumprojekt</option>
-                <option value="Technikprojekt">Technikprojekt</option>
-                <option value="Schul- oder Lernprojekt">Schul- oder Lernprojekt</option>
-                <option value="Bastel- oder DIY-Projekt">Bastel- oder DIY-Projekt</option>
-                <option value="Organisationsprojekt">Organisationsprojekt</option>
-                <option value="Freizeit- oder Eventprojekt">Freizeit- oder Eventprojekt</option>
-                <option value="Kindergartenprojekt">Kindergartenprojekt</option>
-                <option value="Schulgebäudeprojekt">Schulgebäudeprojekt</option>
-                <option value="Schwimmbadprojekt">Schwimmbadprojekt</option>
-                <option value="Firmenprojekt">Firmenprojekt</option>
-                <option value="Game-Design-Projekt">Game-Design-Projekt</option>
-                <option value="Innenarchitekturprojekt">Innenarchitekturprojekt</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="budgetInput">Budget</label>
-              <input id="budgetInput" type="number" min="0" step="1" placeholder="z. B. 1500" />
-            </div>
-
-            <div class="field">
-              <label for="languageInput">Assistentensprache</label>
-              <select id="languageInput">
-                <option value="de">Deutsch</option>
-                <option value="en">English</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="widthInput">Breite (m)</label>
-              <input id="widthInput" type="number" min="0" step="0.01" placeholder="z. B. 4.5" />
-            </div>
-
-            <div class="field">
-              <label for="heightInput">Höhe (m)</label>
-              <input id="heightInput" type="number" min="0" step="0.01" placeholder="z. B. 3.2" />
-            </div>
-
-            <div class="field">
-              <label for="depthInput">Tiefe (m)</label>
-              <input id="depthInput" type="number" min="0" step="0.01" placeholder="z. B. 2.0" />
-            </div>
-
-            <div class="field">
-              <label for="materialTypeInput">Materialtyp</label>
-              <select id="materialTypeInput">
-                <option value="farbe">Farbe</option>
-                <option value="boden">Boden</option>
-                <option value="teppich">Teppich</option>
-                <option value="pflaster">Pflaster</option>
-                <option value="erde">Erde</option>
-                <option value="beton">Beton</option>
-                <option value="holz">Holz</option>
-                <option value="fliesen">Fliesen</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="spacingInput">Abstand pro Objekt (m)</label>
-              <input id="spacingInput" type="number" min="0" step="0.01" placeholder="z. B. 0.5" />
-            </div>
-
-            <div class="field">
-              <label for="objectCountInput">Objektanzahl</label>
-              <input id="objectCountInput" type="number" min="0" step="1" placeholder="z. B. 6" />
-            </div>
-
-            <div class="field">
-              <label for="requiredAreaInput">Benötigte Fläche (m²)</label>
-              <input id="requiredAreaInput" type="number" min="0" step="0.01" placeholder="z. B. 12" />
-            </div>
-          </section>
-
-          <section class="panel">
-            <h3>Bilder</h3>
-            <label class="upload-box" for="imageInput">
-              <span>Bilder hochladen</span>
-              <small>Mehrere Bilder auswählen</small>
+        <form id="plannerForm">
+          <div class="field-grid">
+            <label>
+              Projektname
+              <input type="text" id="projectName" placeholder="z. B. Gartenhaus, Lagerbox, Raumplanung" />
+              <span class="hint">Optional, aber hilfreich zur Übersicht.</span>
             </label>
-            <input id="imageInput" type="file" accept="image/*" multiple />
-            <div id="imageGallery" class="image-gallery"></div>
 
-            <h3>Items</h3>
-            <div class="item-actions">
-              <button id="addItemBtn" type="button" class="secondary-btn">Item hinzufügen</button>
-              <button id="addFurnitureBtn" type="button" class="secondary-btn">Möbel</button>
-              <button id="addGardenBtn" type="button" class="secondary-btn">Garten</button>
-              <button id="addTechBtn" type="button" class="secondary-btn">Technik</button>
-            </div>
-            <div id="itemsContainer" class="items-container"></div>
-          </section>
-        </div>
+            <label>
+              Objekttyp
+              <select id="objectType">
+                <option value="Raum">Raum</option>
+                <option value="Gartenhaus">Gartenhaus</option>
+                <option value="Garage">Garage</option>
+                <option value="Container">Container</option>
+                <option value="Lager">Lager</option>
+                <option value="Sonstiges">Sonstiges</option>
+              </select>
+              <span class="hint">Zur groben Einordnung des Projekts.</span>
+            </label>
+
+            <label>
+              Länge (m)
+              <input type="number" id="length" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">Wird für Fläche und Volumen verwendet.</span>
+            </label>
+
+            <label>
+              Breite (m)
+              <input type="number" id="width" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">Mit Länge ergibt sich die Grundfläche.</span>
+            </label>
+
+            <label>
+              Höhe (m)
+              <input type="number" id="height" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">Für die Objektgröße in m³.</span>
+            </label>
+
+            <label>
+              Wandstärke (cm)
+              <input type="number" id="wallThickness" min="0" step="0.1" placeholder="0,0" />
+              <span class="hint">Optional für genauere Materialplanung.</span>
+            </label>
+
+            <label>
+              Grundfläche (m²)
+              <input type="number" id="areaManual" min="0" step="0.01" placeholder="wird automatisch berechnet" />
+              <span class="hint">Kann automatisch oder manuell gesetzt werden.</span>
+            </label>
+
+            <label>
+              Objektgröße / Volumen (m³)
+              <input type="number" id="volumeManual" min="0" step="0.01" placeholder="wird automatisch berechnet" />
+              <span class="hint">Wird aus Länge × Breite × Höhe berechnet.</span>
+            </label>
+
+            <label>
+              Material
+              <select id="material">
+                <option value="Holz">Holz</option>
+                <option value="Beton">Beton</option>
+                <option value="Stahl">Stahl</option>
+                <option value="Ziegel">Ziegel</option>
+                <option value="Glas">Glas</option>
+                <option value="Kunststoff">Kunststoff</option>
+                <option value="Mischbau">Mischbau</option>
+              </select>
+              <span class="hint">Hauptmaterial des Objekts.</span>
+            </label>
+
+            <label>
+              Materialmenge
+              <input type="number" id="materialQty" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">z. B. m², m³ oder Stück – frei nutzbar.</span>
+            </label>
+
+            <label>
+              Materialkosten (€)
+              <input type="number" id="materialCost" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">Gesamtkosten für das Material.</span>
+            </label>
+
+            <label>
+              Arbeitskosten (€)
+              <input type="number" id="laborCost" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">Zusätzliche Kosten für Arbeit.</span>
+            </label>
+
+            <label>
+              Transportkosten (€)
+              <input type="number" id="transportCost" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">Optional für Lieferung oder Anfahrt.</span>
+            </label>
+
+            <label>
+              Reserve / Sonstiges (€)
+              <input type="number" id="extraCost" min="0" step="0.01" placeholder="0,00" />
+              <span class="hint">Für Puffer, Reserve oder Nebenkosten.</span>
+            </label>
+
+            <label class="field-wide">
+              Grundriss vom Objekt
+              <textarea id="floorPlan" placeholder="Beschreibe hier den Grundriss: z. B. rechteckig, 2 Räume, Eingang vorne links, Lagerbereich hinten ..."></textarea>
+              <span class="hint">Ein Textfeld ist einfacher und funktioniert direkt auf Handy und PC.</span>
+            </label>
+
+            <label class="field-wide">
+              Grundriss-Datei / Skizze hochladen
+              <input type="file" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf,.svg" />
+              <span class="hint">Optional: Name der Datei wird angezeigt, aber nicht online gespeichert.</span>
+            </label>
+
+            <label class="field-wide">
+              Notizen
+              <textarea id="notes" placeholder="Weitere Hinweise, Maße, Besonderheiten, Materialwünsche, Dachform, Anzahl der Räume ..."></textarea>
+              <span class="hint">Hier kannst du alles ergänzen, was später wichtig ist.</span>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" type="submit">Berechnen</button>
+            <button class="btn-secondary" type="button" id="resetBtn">Zurücksetzen</button>
+            <button class="btn-secondary" type="button" id="saveBtn">Im Browser speichern</button>
+          </div>
+        </form>
       </section>
 
-      <section id="planTab" class="tab-panel">
-        <div class="grid-2">
-          <section class="panel">
-            <h3>2D-Fläche</h3>
-            <canvas id="planCanvas" width="900" height="600"></canvas>
-          </section>
-
-          <section class="panel">
-            <h3>3D-Modus</h3>
-            <div class="toggle-row">
-              <button id="toggle3dBtn" class="secondary-btn" type="button">3D umschalten</button>
-            </div>
-            <div id="threeDBox" class="three-d-box">
-              <div class="cube">
-                <div class="face front"></div>
-                <div class="face back"></div>
-                <div class="face right"></div>
-                <div class="face left"></div>
-                <div class="face top"></div>
-                <div class="face bottom"></div>
-              </div>
-            </div>
-            <div class="muted">Der 3D-Modus ist eine visuelle Vorschau auf Basis deiner Maße.</div>
-          </section>
+      <aside class="results obs" aria-live="polite">
+        <div>
+          <h2>Auswertung</h2>
+          <p class="section-intro" style="margin-bottom:0;">
+            Diese Werte werden automatisch aus deinen Eingaben berechnet.
+          </p>
         </div>
-      </section>
 
-      <section id="assistantTab" class="tab-panel">
-        <div class="grid-2">
-          <section class="panel">
-            <h3>KI-Assistent</h3>
-            <div id="assistantBox" class="assistant-box">Hier erscheint die intelligente Zusammenfassung.</div>
-          </section>
-
-          <section class="panel">
-            <h3>Dashboard</h3>
-            <div id="dashboard" class="dashboard-grid"></div>
-          </section>
+        <div class="results-highlight">
+          <div class="tiny">Gesamtkosten</div>
+          <div class="big" id="totalCostOut">0,00 €</div>
         </div>
-      </section>
 
-      <section id="exportTab" class="tab-panel">
-        <div class="grid-2">
-          <section class="panel">
-            <h3>Ergebnis</h3>
-            <div id="output" class="output-box">Hier erscheint die Analyse.</div>
-          </section>
-
-          <section class="panel">
-            <h3>Gespeicherte Projekte</h3>
-            <div id="savedProjectsList" class="saved-list"></div>
-          </section>
+        <div class="result-stack">
+          <div class="result-line">
+            <span>Grundfläche</span>
+            <strong id="areaOut">0,00 m²</strong>
+          </div>
+          <div class="result-line">
+            <span>Volumen</span>
+            <strong id="volumeOut">0,00 m³</strong>
+          </div>
+          <div class="result-line">
+            <span>Material</span>
+            <strong id="materialOut">–</strong>
+          </div>
+          <div class="result-line">
+            <span>Materialkosten</span>
+            <strong id="materialCostOut">0,00 €</strong>
+          </div>
+          <div class="result-line">
+            <span>Arbeitskosten</span>
+            <strong id="laborCostOut">0,00 €</strong>
+          </div>
+          <div class="result-line">
+            <span>Kosten pro m²</span>
+            <strong id="costPerAreaOut">0,00 €</strong>
+          </div>
+          <div class="result-line">
+            <span>Kosten pro m³</span>
+            <strong id="costPerVolumeOut">0,00 €</strong>
+          </div>
         </div>
-      </section>
-    </main>
-  </div>
 
-  <script src="script.js"></script>
+        <div>
+          <div class="panel-tag" style="margin-bottom:10px;">Materialanteil an Gesamtkosten</div>
+          <div class="material-bar" aria-hidden="true">
+            <div class="material-fill" id="materialFill"></div>
+          </div>
+        </div>
+
+        <div class="file-badge" id="fileBadge">Keine Grundriss-Datei ausgewählt</div>
+      </aside>
+    </section>
+
+    <section class="notes obs">
+      <div class="note-block">
+        <h2>Was man noch reinnehmen kann</h2>
+        <ul>
+          <li>Dachform und Dachfläche</li>
+          <li>Anzahl der Räume oder Zonen</li>
+          <li>Fenster- und Türflächen</li>
+          <li>Isolierung / Dämmung</li>
+          <li>Standort und Datum</li>
+          <li>Status: geplant, in Arbeit, fertig</li>
+          <li>Materialpreis pro Einheit</li>
+          <li>Gewicht oder Belastbarkeit</li>
+        </ul>
+      </div>
+
+      <div class="note-block">
+        <h3>Dein neuer Aufbau</h3>
+        <ul>
+          <li>Grundfläche in m²</li>
+          <li>Objektgröße in m³</li>
+          <li>Grundriss vom Objekt</li>
+          <li>Material</li>
+          <li>Materialkosten</li>
+          <li>Arbeitskosten</li>
+          <li>Transportkosten</li>
+          <li>Reserve / Sonstiges</li>
+          <li>Kosten pro m² und m³</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    ObjektPlaner – direkt im Browser nutzbar, mobilfreundlich und ohne externe Bilder.
+  </footer>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    const form = $("plannerForm");
+    const fields = {
+      projectName: $("projectName"),
+      objectType: $("objectType"),
+      length: $("length"),
+      width: $("width"),
+      height: $("height"),
+      wallThickness: $("wallThickness"),
+      areaManual: $("areaManual"),
+      volumeManual: $("volumeManual"),
+      material: $("material"),
+      materialQty: $("materialQty"),
+      materialCost: $("materialCost"),
+      laborCost: $("laborCost"),
+      transportCost: $("transportCost"),
+      extraCost: $("extraCost"),
+      floorPlan: $("floorPlan"),
+      floorPlanFile: $("floorPlanFile"),
+      notes: $("notes")
+    };
+
+    const outputs = {
+      totalCost: $("totalCostOut"),
+      area: $("areaOut"),
+      volume: $("volumeOut"),
+      material: $("materialOut"),
+      materialCost: $("materialCostOut"),
+      laborCost: $("laborCostOut"),
+      costPerArea: $("costPerAreaOut"),
+      costPerVolume: $("costPerVolumeOut"),
+      materialFill: $("materialFill"),
+      fileBadge: $("fileBadge")
+    };
+
+    const formatNumber = (n) =>
+      new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
+
+    const formatCurrency = (n) => `${formatNumber(n)} €`;
+
+    function val(el){
+      return parseFloat(el.value.replace(",", ".")) || 0;
+    }
+
+    function calculate(){
+      const length = val(fields.length);
+      const width = val(fields.width);
+      const height = val(fields.height);
+
+      const autoArea = length > 0 && width > 0 ? length * width : 0;
+      const autoVolume = autoArea > 0 && height > 0 ? autoArea * height : 0;
+
+      const area = val(fields.areaManual) || autoArea;
+      const volume = val(fields.volumeManual) || autoVolume;
+
+      const materialCost = val(fields.materialCost);
+      const laborCost = val(fields.laborCost);
+      const transportCost = val(fields.transportCost);
+      const extraCost = val(fields.extraCost);
+
+      const totalCost = materialCost + laborCost + transportCost + extraCost;
+      const costPerArea = area > 0 ? totalCost / area : 0;
+      const costPerVolume = volume > 0 ? totalCost / volume : 0;
+      const materialPercent = totalCost > 0 ? Math.min((materialCost / totalCost) * 100, 100) : 0;
+
+      outputs.totalCost.textContent = formatCurrency(totalCost);
+      outputs.area.textContent = `${formatNumber(area)} m²`;
+      outputs.volume.textContent = `${formatNumber(volume)} m³`;
+      outputs.material.textContent = fields.material.value || "–";
+      outputs.materialCost.textContent = formatCurrency(materialCost);
+      outputs.laborCost.textContent = formatCurrency(laborCost);
+      outputs.costPerArea.textContent = `${formatCurrency(costPerArea)}`;
+      outputs.costPerVolume.textContent = `${formatCurrency(costPerVolume)}`;
+      outputs.materialFill.style.width = `${materialPercent}%`;
+
+      return {
+        projectName: fields.projectName.value,
+        objectType: fields.objectType.value,
+        length, width, height,
+        wallThickness: val(fields.wallThickness),
+        areaManual: val(fields.areaManual),
+        volumeManual: val(fields.volumeManual),
+        area, volume,
+        material: fields.material.value,
+        materialQty: val(fields.materialQty),
+        materialCost, laborCost, transportCost, extraCost,
+        floorPlan: fields.floorPlan.value,
+        notes: fields.notes.value,
+        totalCost, costPerArea, costPerVolume
+      };
+    }
+
+    function saveToLocal(){
+      const data = calculate();
+      localStorage.setItem("objektplaner-data", JSON.stringify(data));
+      const old = $("saveBtn").textContent;
+      $("saveBtn").textContent = "Gespeichert";
+      setTimeout(() => $("saveBtn").textContent = old, 1400);
+    }
+
+    function loadFromLocal(){
+      const raw = localStorage.getItem("objektplaner-data");
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        Object.keys(data).forEach(key => {
+          if(fields[key] && typeof data[key] !== "object"){
+            fields[key].value = data[key];
+          }
+        });
+        calculate();
+      }catch(e){}
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      calculate();
+    });
+
+    ["input","change"].forEach(evt => {
+      form.addEventListener(evt, (e) => {
+        if(e.target.matches("input, select, textarea")) calculate();
+      });
+    });
+
+    $("resetBtn").addEventListener("click", () => {
+      form.reset();
+      outputs.fileBadge.textContent = "Keine Grundriss-Datei ausgewählt";
+      outputs.materialFill.style.width = "0%";
+      calculate();
+      localStorage.removeItem("objektplaner-data");
+    });
+
+    $("saveBtn").addEventListener("click", saveToLocal);
+
+    $("demoFillBtn").addEventListener("click", () => {
+      fields.projectName.value = "Gartenhaus Nord";
+      fields.objectType.value = "Gartenhaus";
+      fields.length.value = "6";
+      fields.width.value = "4";
+      fields.height.value = "2.8";
+      fields.wallThickness.value = "12";
+      fields.areaManual.value = "";
+      fields.volumeManual.value = "";
+      fields.material.value = "Holz";
+      fields.materialQty.value = "24";
+      fields.materialCost.value = "6800";
+      fields.laborCost.value = "2400";
+      fields.transportCost.value = "450";
+      fields.extraCost.value = "350";
+      fields.floorPlan.value = "Rechteckiger Grundriss, Eingang vorne mittig, Lagerbereich hinten rechts, Arbeitsfläche links.";
+      fields.notes.value = "Dach leicht geneigt, 2 Fenster an der Längsseite, isolierte Wände.";
+      calculate();
+      window.scrollTo({ top: $("planer").offsetTop - 90, behavior: "smooth" });
+    });
+
+    fields.floorPlanFile.addEventListener("change", () => {
+      const file = fields.floorPlanFile.files[0];
+      outputs.fileBadge.textContent = file ? `Datei: ${file.name}` : "Keine Grundriss-Datei ausgewählt";
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add("in");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .12 });
+
+    document.querySelectorAll(".obs").forEach(el => observer.observe(el));
+
+    loadFromLocal();
+    calculate();
+  </script>
 </body>
 </html>
